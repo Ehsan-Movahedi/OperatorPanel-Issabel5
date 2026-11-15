@@ -2,10 +2,10 @@
 set -Eeuo pipefail
 MODULE_INSTALL_STARTED=0
 # Issabel 5 - Official Operator Panel installer
-# Installs https://github.com/ISSABELPBX/panel-issabel5
+# Installs https://github.com/Ehsan-Movahedi/panel-issabel5
 # Tested design target: Issabel 5 / Rocky Linux 8
 
-REPO_URL="https://github.com/ISSABELPBX/panel-issabel5.git"
+REPO_URL="https://github.com/Ehsan-Movahedi/panel-issabel5.git"
 MODULE_NAME="control_panel"
 MODULES_DIR="/var/www/html/modules"
 MODULE_DIR="${MODULES_DIR}/${MODULE_NAME}"
