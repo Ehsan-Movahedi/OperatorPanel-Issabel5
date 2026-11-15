@@ -24,7 +24,7 @@ The installer checks the expected database tables and resolves group/action/reso
 
 ## Run
 
-After publishing this repository to GitHub, replace `YOUR_GITHUB_USER` below with the GitHub account or organization that owns this repository:
+Run the following command on your Issabel 5 server as root:
 
 ```bash
 curl -fL -o OperatorPanel-Issabel5.zip \
@@ -52,4 +52,4 @@ It contains copies of `acl.db` and `menu.db`, and (if a previous module director
 - The installer is designed to be repeatable. Existing ACL and menu records are not duplicated.
 - If the module is already installed, its directory is preserved in the timestamped backup before the new version is put in place.
 - No GUI permission step is required: the Administrator ACL access record is added automatically.
-- The script does not publish itself to GitHub. Create a repository named `install-panel-issabel5`, upload these files, then use the command above.
+- This repository provides the installer only. It downloads the official operator panel source directly from the IssabelPBX upstream repository.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-
+MODULE_INSTALL_STARTED=0
 # Issabel 5 - Official Operator Panel installer
 # Installs https://github.com/ISSABELPBX/panel-issabel5
 # Tested design target: Issabel 5 / Rocky Linux 8
@@ -18,22 +18,43 @@ BACKUP_DIR="${BACKUP_ROOT}/${STAMP}"
 
 log()  { printf '\n[INFO] %s\n' "$*"; }
 warn() { printf '\n[WARN] %s\n' "$*" >&2; }
-die()  { printf '\n[ERROR] %s\n' "$*" >&2; exit 1; }
+die() {
+    printf '\n[ERROR] %s\n' "$*" >&2
+    restore_on_error 1
+}
 
 cleanup() {
     if [[ -n "${TMP_ROOT}" && -d "${TMP_ROOT}" ]]; then
         rm -rf -- "${TMP_ROOT}"
     fi
+
+    if [[ -n "${STAGED_MODULE:-}" && -d "${STAGED_MODULE}" ]]; then
+        rm -rf -- "${STAGED_MODULE}"
+    fi
 }
 restore_on_error() {
-    local rc=$?
+    local rc="${1:-$?}"
+
     if (( rc != 0 )); then
-        if [[ ! -e "${MODULE_DIR}" && -d "${BACKUP_DIR}/module-before-install" ]]; then
-            warn "Installation failed; restoring the previous module directory."
-            mv "${BACKUP_DIR}/module-before-install" "${MODULE_DIR}" || true
+        if [[ -d "${BACKUP_DIR}/module-before-install" ]]; then
+            warn "Installation failed; preserving failed module and restoring previous version."
+
+            if [[ -e "${MODULE_DIR}" ]]; then
+                mv "${MODULE_DIR}" "${BACKUP_DIR}/module-failed" || true
+            fi
+
+            if [[ ! -e "${MODULE_DIR}" ]]; then
+                mv "${BACKUP_DIR}/module-before-install" "${MODULE_DIR}" || true
+            fi
+
+        elif [[ "${MODULE_INSTALL_STARTED:-0}" == "1" && -e "${MODULE_DIR}" ]]; then
+            warn "Installation failed; removing the newly installed module."
+            mv "${MODULE_DIR}" "${BACKUP_DIR}/module-failed" || true
         fi
-        warn "Installation stopped. Backups (if created): ${BACKUP_DIR}"
+
+        warn "Installation stopped. Backups: ${BACKUP_DIR}"
     fi
+
     exit "$rc"
 }
 trap cleanup EXIT
@@ -44,7 +65,7 @@ trap restore_on_error ERR
 [[ -f "${ACL_DB}" ]] || die "ACL database not found: ${ACL_DB}"
 [[ -f "${MENU_DB}" ]] || die "Menu database not found: ${MENU_DB}"
 
-for cmd in git sqlite3 php cp mv install date; do
+for cmd in git sqlite3 php cp mv install date chown grep find mktemp rm; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 
@@ -71,8 +92,8 @@ PARENT_MENU_ID="$(sqlite3 "${MENU_DB}" "SELECT id FROM menu WHERE id='pbxconfig'
 
 log "Creating timestamped backups in ${BACKUP_DIR}"
 install -d -m 0700 "${BACKUP_DIR}"
-cp -a "${ACL_DB}" "${BACKUP_DIR}/acl.db"
-cp -a "${MENU_DB}" "${BACKUP_DIR}/menu.db"
+sqlite3 "${ACL_DB}" ".backup '${BACKUP_DIR}/acl.db'"
+sqlite3 "${MENU_DB}" ".backup '${BACKUP_DIR}/menu.db'"
 
 TMP_ROOT="$(mktemp -d /tmp/issabel-panel-install.XXXXXX)"
 log "Downloading the official Issabel panel repository"
@@ -98,6 +119,7 @@ if [[ -e "${MODULE_DIR}" ]]; then
     mv "${MODULE_DIR}" "${BACKUP_DIR}/module-before-install"
 fi
 
+MODULE_INSTALL_STARTED=1
 mv "${STAGED_MODULE}" "${MODULE_DIR}"
 chown -R asterisk:asterisk "${MODULE_DIR}"
 if command -v restorecon >/dev/null 2>&1; then
