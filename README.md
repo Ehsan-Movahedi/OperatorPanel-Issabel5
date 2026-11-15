@@ -27,10 +27,10 @@ The installer checks the expected database tables and resolves group/action/reso
 After publishing this repository to GitHub, replace `YOUR_GITHUB_USER` below with the GitHub account or organization that owns this repository:
 
 ```bash
-curl -fL -o install-panel-issabel5.zip \
-  https://github.com/Ehsan-Movahedi/install-panel-issabel5/archive/refs/heads/main.zip \
-&& unzip -o -q install-panel-issabel5.zip \
-&& cd install-panel-issabel5-main \
+curl -fL -o OperatorPanel-Issabel5.zip \
+https://github.com/Ehsan-Movahedi/OperatorPanel-Issabel5/archive/refs/heads/main.zip \
+&& unzip -o -q OperatorPanel-Issabel5.zip \
+&& cd OperatorPanel-Issabel5-main \
 && chmod 755 install.sh \
 && ./install.sh
 ```
