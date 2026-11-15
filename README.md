@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/34868916/README.md)
 # Issabel 5 Operator Panel Installer
 
 One-command installer for the official Issabel operator panel module:
