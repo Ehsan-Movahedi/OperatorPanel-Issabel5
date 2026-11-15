@@ -28,7 +28,7 @@ After publishing this repository to GitHub, replace `YOUR_GITHUB_USER` below wit
 
 ```bash
 curl -fL -o install-panel-issabel5.zip \
-  https://github.com/YOUR_GITHUB_USER/install-panel-issabel5/archive/refs/heads/main.zip \
+  https://github.com/Ehsan-Movahedi/install-panel-issabel5/archive/refs/heads/main.zip \
 && unzip -o -q install-panel-issabel5.zip \
 && cd install-panel-issabel5-main \
 && chmod 755 install.sh \
